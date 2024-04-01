@@ -1,0 +1,82 @@
+{
+  "totalWeight": 1751,
+  "items": [
+    {
+      "item": "Unbekannter Samen",
+      "amount": 193,
+      "singleWeight": 0.001,
+      "totalWeight": 0.193,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 195,
+      "singleWeight": 0.001,
+      "totalWeight": 0.195,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 204,
+      "singleWeight": 0.001,
+      "totalWeight": 0.20400000000000001,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 180,
+      "singleWeight": 0.001,
+      "totalWeight": 0.18,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 173,
+      "singleWeight": 0.001,
+      "totalWeight": 0.17300000000000001,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 195,
+      "singleWeight": 0.001,
+      "totalWeight": 0.195,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 185,
+      "singleWeight": 0.001,
+      "totalWeight": 0.185,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 100,
+      "singleWeight": 0.001,
+      "totalWeight": 0.1,
+      "icon": null
+    },
+    {
+      "item": "Unbekannter Samen",
+      "amount": 225,
+      "singleWeight": 0.001,
+      "totalWeight": 0.225,
+      "icon": null
+    },
+    {
+      "item": "[M] Gelber Schutzhelm",
+      "amount": 1,
+      "singleWeight": 0.33,
+      "totalWeight": 0.33,
+      "icon": null
+    },
+    {
+      "item": "Gummi",
+      "amount": 100,
+      "singleWeight": 0.5,
+      "totalWeight": 79.5,
+      "icon": null
+    }
+  ]
+}
