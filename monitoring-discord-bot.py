@@ -26,7 +26,7 @@ API_ENDPOINT = os.getenv("API_ENDPOINT")
 API_FACTORY_ID = os.getenv("API_FACTORY_ID")
 API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN")
 THRESHOLD_WEIGHT = int(os.getenv("THRESHOLD_WEIGHT"))
-SLEEP_TIMER = 1 if DEVELOPMENT_MODE else 120
+SLEEP_TIMER = 1 if DEVELOPMENT_MODE == True else 120
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!", intents=intents)
@@ -39,7 +39,7 @@ bot_paused = False
 async def send_message(message):
     try:
         await client.wait_until_ready()
-        channel_id = DEV_CHANNEL_ID if DEVELOPMENT_MODE else CHANNEL_ID
+        channel_id = DEV_CHANNEL_ID if DEVELOPMENT_MODE == True else CHANNEL_ID
         channel = client.get_channel(channel_id)
         if channel:
             await channel.send(message)
@@ -60,7 +60,7 @@ async def get_total_weight_and_items():
     try:
         url = (
             DEV_API_URL
-            if DEVELOPMENT_MODE
+            if DEVELOPMENT_MODE == True
             else f"{API_URL}{API_ENDPOINT}{API_FACTORY_ID}"
         )
         headers = {"authorization": f"Bearer {API_BEARER_TOKEN}"}
