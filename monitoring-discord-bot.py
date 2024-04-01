@@ -26,7 +26,7 @@ API_ENDPOINT = os.getenv("API_ENDPOINT")
 API_FACTORY_ID = os.getenv("API_FACTORY_ID")
 API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN")
 THRESHOLD_WEIGHT = int(os.getenv("THRESHOLD_WEIGHT"))
-SLEEP_TIMER = 1 if DEVELOPMENT_MODE == True else 120
+SLEEP_TIMER = 1 if DEVELOPMENT_MODE == True else 300
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!", intents=intents)
