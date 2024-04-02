@@ -2,6 +2,7 @@
 
 import discord
 from discord.ext import commands, tasks
+from discord import Embed
 from dotenv import load_dotenv
 import aiohttp
 import asyncio
@@ -26,7 +27,8 @@ API_ENDPOINT = os.getenv("API_ENDPOINT")
 API_FACTORY_ID = os.getenv("API_FACTORY_ID")
 API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN")
 THRESHOLD_WEIGHT = int(os.getenv("THRESHOLD_WEIGHT"))
-SLEEP_TIMER = 1 if DEVELOPMENT_MODE == True else 300
+MAX_WEIGHT = int(os.getenv("MAX_WEIGHT"))
+SLEEP_TIMER = 1 if DEVELOPMENT_MODE == "True" else 600  # 10min
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!", intents=intents)
@@ -36,13 +38,13 @@ weight_notification_sent = False
 bot_paused = False
 
 
-async def send_message(message):
+async def send_embed(embed):
     try:
         await client.wait_until_ready()
-        channel_id = DEV_CHANNEL_ID if DEVELOPMENT_MODE == True else CHANNEL_ID
+        channel_id = DEV_CHANNEL_ID if DEVELOPMENT_MODE == "True" else CHANNEL_ID
         channel = client.get_channel(channel_id)
         if channel:
-            await channel.send(message)
+            await channel.send(embed=embed)
         else:
             logger.error("Channel not found.")
     except Exception as e:
@@ -60,7 +62,7 @@ async def get_total_weight_and_items():
     try:
         url = (
             DEV_API_URL
-            if DEVELOPMENT_MODE == True
+            if DEVELOPMENT_MODE == "True"
             else f"{API_URL}{API_ENDPOINT}{API_FACTORY_ID}"
         )
         headers = {"authorization": f"Bearer {API_BEARER_TOKEN}"}
@@ -77,22 +79,48 @@ async def monitor_api_updates():
     global previous_items, weight_notification_sent, bot_paused
     try:
         previous_total_weight, _ = await get_total_weight_and_items()
-        message = f"**STATEV MONITORING STARTED** ```Current Weight: {previous_total_weight}/1850 KG\n``` ```DEV MODE: {DEVELOPMENT_MODE} - API Request Time: {SLEEP_TIMER} seconds```<@&1222362557495382047>"
-        logger.info(message)
-        await send_message(message)
+        logger.info(
+            f"DEV MODE: {DEVELOPMENT_MODE} - API Request Time: {SLEEP_TIMER} seconds"
+        )
+        embed = Embed(title="Monitoring Started", color=0x0000FF)
+        embed.add_field(
+            name="Total Storage weight",
+            value=f"{previous_total_weight}/{MAX_WEIGHT} KG",
+            inline=False,
+        )
+        embed.add_field(
+            name="Info",
+            value=f"DEV MODE: {DEVELOPMENT_MODE} - API Request Time: {SLEEP_TIMER} seconds",
+            inline=False,
+        )
+
+        embed.add_field(
+            name="",
+            value="<@&1222362557495382047>",
+            inline=False,
+        )
+
+        await send_embed(embed)
         while True:
             if not bot_paused:
                 current_total_weight, current_items = await get_total_weight_and_items()
                 if current_total_weight != previous_total_weight:
                     previous_total_weight = current_total_weight
+
                 if (
                     current_total_weight > THRESHOLD_WEIGHT
                     and not weight_notification_sent
                 ):
-                    await send_message(
-                        f"## Storage nearly full! {1850 - current_total_weight} KG left until user cannot add more items! @everyone"
+
+                    message = f"## Storage nearly full! {MAX_WEIGHT - current_total_weight} KG left until user cannot add more items! @everyone"
+
+                    embed = Embed(
+                        title="Storage Alert", description=message, color=0xFF0000
                     )
+
+                    await send_embed(embed)
                     weight_notification_sent = True
+
                 if current_total_weight <= THRESHOLD_WEIGHT:
                     weight_notification_sent = False
                 for item, current_item_data in current_items.items():
@@ -110,14 +138,69 @@ async def monitor_api_updates():
                                 if current_amount > previous_amount
                                 else "removed from"
                             )
-                            message = f"**Item {message_type} storage:** ```{item}: {abs(current_amount - previous_amount)}x\n\n\nNew Weight: {current_total_weight}/1850 KG\n```<@&1222362557495382047>"
-                            logger.info(message)
-                            await send_message(message)
+
+                            logger.info(
+                                f"Item {message_type} storage; {item}: {abs(current_amount - previous_amount)}"
+                            )
+
+                            embed = Embed(
+                                title=f"Item **{message_type}** storage",
+                                color=(
+                                    int(0x00FF00)
+                                    if message_type == "added to"
+                                    else int(0xFFA500)
+                                ),
+                            )
+
+                            embed.add_field(
+                                name="Total Storage weight",
+                                value=f"{current_total_weight}/{MAX_WEIGHT} KG",
+                                inline=False,
+                            )
+
+                            embed.add_field(
+                                name="Info",
+                                value=f"{item}: {abs(current_amount - previous_amount)}x ({previous_amount}x -> **{current_amount}x**)",
+                                inline=False,
+                            )
+
+                            embed.add_field(
+                                name="",
+                                value="<@&1222362557495382047>",
+                                inline=False,
+                            )
+
+                            await send_embed(embed)
+
                 for item, previous_item_data in previous_items.items():
                     if item not in current_items:
-                        message = f"**Item removed from storage (Last Item):** ```\n{item}\n\n\nNew Weight: {current_total_weight}/1850 KG\n```<@&1222362557495382047>"
-                        logger.info(message)
-                        await send_message(message)
+
+                        logger.info(f"Last Item removed from storage: {item}")
+
+                        embed = Embed(
+                            title=f"Last Item **removed from** storage",
+                            color=(int(0xFFA500)),
+                        )
+
+                        embed.add_field(
+                            name="Total Storage weight",
+                            value=f"{current_total_weight}/{MAX_WEIGHT} KG",
+                            inline=False,
+                        )
+
+                        embed.add_field(
+                            name="Info",
+                            value=f"{item}",
+                            inline=False,
+                        )
+
+                        embed.add_field(
+                            name="",
+                            value="<@&1222362557495382047>",
+                            inline=False,
+                        )
+
+                        await send_embed(embed)
                 previous_items = current_items
             await asyncio.sleep(SLEEP_TIMER)
     except Exception as e:
@@ -150,19 +233,26 @@ async def resume(ctx):
 
 @client.command()
 async def info(ctx):
-    global total_weight, current_items
     try:
         total_weight, current_items = await get_total_weight_and_items()
         logger.info(f"Bot Info: {total_weight} - {current_items}")
+
+        embed = Embed(title="Storage Information", color=0x00FF00)
+        embed.add_field(
+            name="Storage weight", value=f"{total_weight}/{MAX_WEIGHT} KG", inline=False
+        )
+
         items_string = "\n".join(
             [
                 f"{item['item']} - {item['amount']}x - {item['singleWeight']} KG - {item['totalWeight']} KG"
                 for item in current_items.values()
             ]
         )
-        await ctx.send(
-            f"**Storage weight: {total_weight}/1850 KG** \nCurrent items in storage:\n```{items_string}```"
+        embed.add_field(
+            name="Current items in storage", value=items_string, inline=False
         )
+
+        await ctx.send(embed=embed)
     except Exception as e:
         logger.error(f"Failed to fetch info: {str(e)}")
 
