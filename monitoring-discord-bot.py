@@ -38,13 +38,13 @@ weight_notification_sent = False
 bot_paused = False
 
 
-async def send_embed(embed):
+async def send_embed(content, embed):
     try:
         await client.wait_until_ready()
         channel_id = DEV_CHANNEL_ID if DEVELOPMENT_MODE == "True" else CHANNEL_ID
         channel = client.get_channel(channel_id)
         if channel:
-            await channel.send(embed=embed)
+            await channel.send(content=content, embed=embed)
         else:
             logger.error("Channel not found.")
     except Exception as e:
@@ -94,13 +94,7 @@ async def monitor_api_updates():
             inline=False,
         )
 
-        embed.add_field(
-            name="",
-            value="<@&1222362557495382047>",
-            inline=False,
-        )
-
-        await send_embed(embed)
+        await send_embed("<@&1222362557495382047>", embed)
         while True:
             if not bot_paused:
                 current_total_weight, current_items = await get_total_weight_and_items()
@@ -112,13 +106,13 @@ async def monitor_api_updates():
                     and not weight_notification_sent
                 ):
 
-                    message = f"## Storage nearly full! {MAX_WEIGHT - current_total_weight} KG left until user cannot add more items! @everyone"
+                    message = f"## Storage nearly full! {MAX_WEIGHT - current_total_weight} KG left until user cannot add more items!"
 
                     embed = Embed(
                         title="Storage Alert", description=message, color=0xFF0000
                     )
 
-                    await send_embed(embed)
+                    await send_embed("@everyone", embed)
                     weight_notification_sent = True
 
                 if current_total_weight <= THRESHOLD_WEIGHT:
@@ -164,13 +158,7 @@ async def monitor_api_updates():
                                 inline=False,
                             )
 
-                            embed.add_field(
-                                name="",
-                                value="<@&1222362557495382047>",
-                                inline=False,
-                            )
-
-                            await send_embed(embed)
+                            await send_embed("<@&1222362557495382047>", embed)
 
                 for item, previous_item_data in previous_items.items():
                     if item not in current_items:
@@ -194,13 +182,7 @@ async def monitor_api_updates():
                             inline=False,
                         )
 
-                        embed.add_field(
-                            name="",
-                            value="<@&1222362557495382047>",
-                            inline=False,
-                        )
-
-                        await send_embed(embed)
+                        await send_embed("<@&1222362557495382047>", embed)
                 previous_items = current_items
             await asyncio.sleep(SLEEP_TIMER)
     except Exception as e:
