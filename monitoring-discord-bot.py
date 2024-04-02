@@ -219,7 +219,7 @@ async def info(ctx):
         total_weight, current_items = await get_total_weight_and_items()
         logger.info(f"Bot Info: {total_weight} - {current_items}")
 
-        embed = Embed(title="Storage Information", color=0x00FF00)
+        embed = Embed(title="Storage Information", color=0x0000FF)
         embed.add_field(
             name="Storage weight", value=f"{total_weight}/{MAX_WEIGHT} KG", inline=False
         )
